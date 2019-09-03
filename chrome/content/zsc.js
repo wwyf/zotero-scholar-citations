@@ -1,6 +1,7 @@
 let zsc = {
     _captchaString: '',
     _citedPrefixString: 'Cited by ',
+    _tooManyRequestsString: '',
     _citeCountStrLength: 7,
     _extraPrefix: 'ZSCC',
     _extraEntrySep: ' \n',
@@ -31,6 +32,7 @@ zsc.init = function() {
     if (stringBundle != null) {
         this._captchaString = stringBundle.getString('captchaString');
         this._citedPrefixString = stringBundle.getString('citedPrefixString');
+        this._tooManyRequestsString = stringBundle.getString('tooManyRequestsString');
     }
 
     // Register the callback in Zotero as an item observer
@@ -200,12 +202,13 @@ zsc.retrieveCitationData = function(item, cb) {
                 }
             }
         } else if (this.readyState == 4 && this.status == 429) {
+            let retryTimeout = ' ' + this.getResponseHeader("Retry-After") + 's';
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'could not retrieve the google scholar data. Server returned: ['
                 + xhr.status + ': '  + xhr.statusText + ']. '
-                + 'GS want\'s you to wait for ' + this.getResponseHeader("Retry-After")
-                + ' seconds before sending further requests.');
-
+                + 'GS want\'s you to wait for ' + retryTimeout
+                + ' before sending further requests.');
+            alert(zsc._tooManyRequestsString + retryTimeout);
         } else if (this.readyState == 4) {
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'could not retrieve the google scholar data. Server returned: ['
