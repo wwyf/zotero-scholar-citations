@@ -2,7 +2,7 @@ let zsc = {
     _captchaString: '',
     _citedPrefixString: 'Cited by ',
     _citeCountStrLength: 7,
-    _extraPrefix: 'ZSCC',
+    _extraPrefix: '',
     _extraEntrySep: ' \n',
     _noData : 'NoCitationData',
     _searchblackList: new RegExp('[-+~*":]', 'g'),
@@ -120,26 +120,26 @@ zsc.processItems = function(items) {
 };
 
 zsc.updateItem = function(item, citeCount) {
-    let curExtra = item.getField('extra');
-    let matches = curExtra.match(zsc._extraRegex);
-    let newExtra = '';
+    let curCallNumber = item.getField('callNumber');
+    let matches = curCallNumber.match(zsc._extraRegex);
+    let newCallNumber = '';
 
     if (citeCount >= 0) {
-        newExtra += zsc.buildCiteCountString(citeCount);
+        newCallNumber += zsc.buildCiteCountString(citeCount);
         if (isDebug()) Zotero.debug('[scholar-citations] '
             + 'updating extra field with new cite count');
     } else {
         if (matches[1] === '') {
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'updating extra field that contains no zsc content');
-            newExtra += zsc.buildCiteCountString(citeCount);
+            newCallNumber += zsc.buildCiteCountString(citeCount);
         } else if (matches[1] === zsc._noData || matches[1] === 'No Citation Data') {
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'updating extra field that contains "no data"');
-            newExtra += zsc.buildCiteCountString(citeCount);
+            newCallNumber += zsc.buildCiteCountString(citeCount);
         } else {
             let oldCiteCount = parseInt(matches[1]);
-            newExtra += zsc.buildCiteCountString(oldCiteCount);
+            newCallNumber += zsc.buildCiteCountString(oldCiteCount);
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'updating extra field that contains cite count');
         }
@@ -147,24 +147,24 @@ zsc.updateItem = function(item, citeCount) {
         if (!matches[2]) {
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'marking extra field as stale');
-            newExtra += zsc.buildStalenessString(0);
+            newCallNumber += zsc.buildStalenessString(0);
         } else {
             if (isDebug()) Zotero.debug('[scholar-citations] '
                 + 'increasing staleness counter in extra field');
-            newExtra += zsc.buildStalenessString((parseInt(matches[2]) + 1) % 10);
+            newCallNumber += zsc.buildStalenessString((parseInt(matches[2]) + 1) % 10);
         }
     }
 
     if (/^\s\n/.test(matches[3]) || matches[3] === '') {
         // do nothing, since the separator is already correct or not needed at all
     } else if (/^\n/.test(matches[3])) {
-        newExtra += ' ';
+        newCallNumber += ' ';
     } else {
-        newExtra += zsc._extraEntrySep;
+        newCallNumber += zsc._extraEntrySep;
     }
-    newExtra += matches[3];
+    newCallNumber += matches[3];
 
-    item.setField('extra', newExtra);
+    item.setField('callNumber', newCallNumber);
 
     try { item.saveTx(); } catch (e) {
         if (isDebug()) Zotero.debug("[scholar-citations] "
@@ -276,9 +276,9 @@ zsc.padLeftWithZeroes = function(numStr) {
 
 zsc.buildCiteCountString = function(citeCount) {
     if (citeCount < 0)
-        return this._extraPrefix + ': ' + this._noData;
+        return this._extraPrefix + '' + this._noData;
     else
-        return this._extraPrefix + ': ' + this.padLeftWithZeroes(citeCount.toString());
+        return this._extraPrefix + '' + citeCount.toString();
 };
 
 zsc.buildStalenessString = function(stalenessCount) {
