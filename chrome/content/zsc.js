@@ -4,7 +4,7 @@ let zsc = {
     _citeCountStrLength: 7,
     _extraPrefix: '',
     _extraEntrySep: ' \n',
-    _noData : 'NoCitationData',
+    _noData : '0NoCitationData',
     _searchblackList: new RegExp('[-+~*":]', 'g'),
     _baseUrl : 'https://scholar.google.com/'
 };
